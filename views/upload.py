@@ -1,5 +1,6 @@
-import streamlit as st
+from service.transcription_service import transcribe_audio 
 
+import streamlit as st
 # st.set_page_config(page_title="Upload Call | SalesSense", page_icon="🎧", layout="centered")
 
 # Page header
@@ -91,14 +92,22 @@ if submitted:
         st.write(f"• File size: ~{round(len(audio_file.getbuffer())/1024, 2)} KB")
         st.write(f"• Call type(s): {', '.join(call_types)}")
 
+        # Call AssemblyAI transcription
+        with st.spinner("Transcribing audio... this may take a moment."):
+            transcript_text = transcribe_audio(audio_file)   # <-- your function
+
         # Save to session for downstream processing page
+        st.session_state.transcript = transcript_text
         st.session_state.upload_ready = True
         st.session_state.audio_file = audio_file
         st.session_state.participants = participants.strip()
         st.session_state.details = details.strip()
         st.session_state.call_types = call_types
-
-
+        
+        # Save transcription result in session
+        st.session_state.transcript_text = transcript_text
+         # Mark upload as ready
+        st.session_state.upload_ready = True
         # Navigate to result page
         st.switch_page("views/results.py")
 
